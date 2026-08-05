@@ -7,7 +7,9 @@ import (
 )
 
 // 磁盘布局：一条记录 = 头部 12B + body
-//   keyLen(4B) | valueLen(4B) | crc(4B) | key | value
+//
+//	keyLen(4B) | valueLen(4B) | crc(4B) | key | value
+//
 // valueLen == 0 表示墓碑（删除标记）
 // crc 只算 body(key+value)，放头部是为了先读 12B 就能决定是否读 body
 type LogRecord struct {

@@ -31,13 +31,13 @@
 
 ## 任务 3：引擎主体（engine 包）
 
-- [ ] `New(options)`：打开数据目录、加载活跃文件、构建空索引。
-- [ ] `Put(key, value)`：编码 -> 追加写 -> 更新索引 `map[string]LogPos{fileId, offset}`。
-- [ ] `Get(key)`：索引查不到返回 `ErrKeyNotFound`；查到了用 LogPos 读回并验证 CRC。
-- [ ] `Delete(key)`：追加写墓碑记录 + 删除索引。
-- [ ] `ListKeys()`：返回索引中所有 key。
-- [ ] `Close()`：关闭文件句柄。
-- 测试：增删改查全流程、覆盖写（同 key 写两次读新值）、删除后 Get 报错。
+- [x] `New(options)`：打开数据目录、加载活跃文件、构建空索引。
+- [x] `Put(key, value)`：编码 -> 追加写 -> 更新索引 `map[string]LogPos{fileId, offset}`。
+- [x] `Get(key)`：索引查不到返回 `ErrKeyNotFound`；查到了用 LogPos 读回并验证 CRC。
+- [x] `Delete(key)`：追加写墓碑记录 + 删除索引。
+- [x] `ListKeys()`：返回索引中所有 key。
+- [x] `Close()`：关闭文件句柄。
+- [x] 测试：增删改查全流程、覆盖写（同 key 写两次读新值）、删除后 Get 报错。
 - 完成条件：`go test ./...` 全绿。
 
 ## 任务 4：启动恢复
@@ -69,7 +69,7 @@
 |------|------|----------|------|
 | 1 记录编解码 | 已完成 | - | |
 | 2 文件管理 | 已完成 | - | |
-| 3 引擎主体 | 未开始 | - | |
+| 3 引擎主体 | 已完成 | 待记录 | Delete 采用墓碑位置入索引、Get 过滤的设计 |
 | 4 启动恢复 | 未开始 | - | |
 | 5 合并压缩 | 未开始 | - | |
 | 6 API 与模糊测试 | 未开始 | - | |
