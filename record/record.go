@@ -6,6 +6,8 @@ import (
 	"hash/crc32"
 )
 
+var TmpErr = errors.New("crc对比不正确")
+
 // 磁盘布局：一条记录 = 头部 12B + body
 //
 //	keyLen(4B) | valueLen(4B) | crc(4B) | key | value
@@ -42,7 +44,7 @@ func Decode(data []byte) (*LogRecord, error) {
 	crcByte := binary.BigEndian.Uint32(data[8:12])
 
 	if crcByte != crc32.ChecksumIEEE(data[12:]) {
-		return nil, errors.New("crc对比不正确")
+		return nil, TmpErr
 	}
 
 	key := data[12 : 12+keyLen]
@@ -60,4 +62,10 @@ func GetKeyLen(data []byte) uint32 {
 
 func GetValueLen(data []byte) uint32 {
 	return binary.BigEndian.Uint32(data[4:8])
+}
+
+// Size 返回一条记录在磁盘上占的总字节数（头部 12B + key + value），
+// 恢复扫描时用它推进 offset。
+func (r *LogRecord) Size() int {
+	return 12 + len(r.Key) + len(r.Value)
 }

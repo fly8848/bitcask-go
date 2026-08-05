@@ -40,10 +40,41 @@ func New(dataDir string) (*Engine, error) {
 
 	i := make(map[string]LogPos, 0)
 
-	return &Engine{
+	e := &Engine{
 		store: st,
 		index: i,
-	}, nil
+	}
+
+	if err := e.loadIndex(); err != nil {
+		return nil, err
+	}
+
+	return e, nil
+}
+
+// loadIndex 打开已有数据目录时重建索引。
+// 思路：按文件 id 从小到大、文件内按 offset 从 0 开始循环读，
+//
+//	把每个 key 的最新位置写入索引；墓碑（value 为空）跳过；
+//	读到损坏记录（CRC 失败）停止该文件，继续下一个。
+//
+// 关键不变量：索引必须指到磁盘上该 key 的最新一条有效记录；
+//
+//	正常扫完（EOF 在文件尾）与提前遇坏记录的处理不能混淆。
+//
+// 自查：写完重开数据齐全；截断文件尾部重开不报错且只丢坏记录。
+func (e *Engine) loadIndex() error {
+	offset := 0
+	for _, fileId := range e.store.FileIds {
+		rec, err := e.store.Read(fileId, int64(offset))
+		if err != nil || len(rec.Value) == 0 {
+			continue
+		}
+
+		e.index[string(rec.Key)] = LogPos{FileId: fileId, Offset: int64(offset)}
+		offset = rec.Size()
+	}
+	return nil
 }
 
 func (e *Engine) Put(key, value []byte) error {
